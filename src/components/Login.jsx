@@ -1,17 +1,13 @@
-import { useEffect } from "react";
-import { signInWithGoogle, auth } from "../firebase";
-
+import { useContext } from "react";
+import { signInWithGoogle } from "../firebase";
+import { authContext } from "../AuthProvider";
+import { Redirect } from "react-router-dom";
 let Login = () => {
-	useEffect(() => {
-		//   onAuthStateChanged ek event hain jo login/logout/signup ke baad chalta
-		// ek baar toh chalta hain hamesha
-		auth.onAuthStateChanged((user) => {
-			console.log(user);
-		});
-	}, []);
-
+	let user = useContext(authContext);
+	console.log(user);
 	return (
 		<>
+			{user ? <Redirect to="/" /> : ""}
 			<button
 				onClick={() => {
 					signInWithGoogle();
@@ -20,15 +16,6 @@ let Login = () => {
 				class="btn btn-primary m-4"
 			>
 				Login to Google
-			</button>
-
-			<button
-				onClick={() => {
-					// jo bhi method se signin kara usko call karke logout kardega/signout ho jaega
-					auth.signOut();
-				}}
-			>
-				Logout
 			</button>
 		</>
 	);
