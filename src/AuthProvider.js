@@ -26,6 +26,7 @@ let AuthProvider = (props) => {
 	return (
 		<>
 			<authContext.Provider value={user}>
+				{/* props object hamare pass hota and uske andhar ek property hain child jo ki apne child btata hain */}
 				{!loading && props.children}
 			</authContext.Provider>
 		</>
