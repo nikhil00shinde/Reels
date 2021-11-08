@@ -4,7 +4,6 @@ import { authContext } from "../AuthProvider";
 import { Redirect } from "react-router-dom";
 let Login = () => {
 	let user = useContext(authContext);
-	console.log(user);
 	return (
 		<>
 			{user ? <Redirect to="/" /> : ""}
