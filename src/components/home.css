@@ -1,0 +1,17 @@
+.home-logout-btn {
+	position: fixed;
+	height: 5rem;
+	width: 5rem;
+	bottom: 4rem;
+	right: 20px;
+	border: none;
+	border-radius: 50%;
+}
+
+.video-container {
+	height: 100vh;
+	width: 100vw;
+	background-color: black;
+	scroll-snap-type: y mandatory;
+	overflow-y: scroll;
+}
