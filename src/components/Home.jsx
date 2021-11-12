@@ -1,17 +1,39 @@
-import { auth, storage } from "../firebase";
+import { auth, storage, firestore } from "../firebase";
 import { authContext } from "../AuthProvider";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Redirect } from "react-router";
 import "./home.css";
 import VideoCard from "./videoCard";
 
 let Home = () => {
 	let user = useContext(authContext);
+	let [posts, setPosts] = useState([]);
+
+	useEffect(() => {
+		//    agar jab bhi hum update karte hain collection mei toh fir real time update hota hain
+		// ki agar kuch update hooya database mei toh fir sare client ko event and woh hamare UI update kar dega
+
+		// agar database mei kuch update hota hain toh ye function chala dena
+		firestore.collection("posts").onSnapshot((querySnapshot) => {
+			let docArr = querySnapshot.docs;
+
+			let arr = [];
+
+			for (let i = 0; i < docArr.length; i++) {
+				arr.push({ id: docArr[i].id, ...docArr[i].data() });
+			}
+
+			setPosts(arr);
+		});
+	}, []);
+
 	return (
 		<>
 			{user ? "" : <Redirect to="/login" />}
 			<div className="video-container">
-				<VideoCard />
+				{posts.map((el) => {
+					return <VideoCard key={el.id} data={el} />;
+				})}
 			</div>
 			<button
 				className="home-logout-btn"
@@ -54,7 +76,14 @@ let Home = () => {
 						// tab ye function chalta hain
 
 						uploadTask.snapshot.ref.getDownloadURL().then((url) => {
-							console.log(url);
+							// console.log(url);
+
+							firestore.collection("posts").add({
+								name: user.displayName,
+								url,
+								likes: [],
+								comments: [],
+							});
 						});
 					});
 				}}
