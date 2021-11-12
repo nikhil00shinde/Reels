@@ -1,9 +1,41 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { firestore } from "../firebase";
+import { authContext } from "../AuthProvider";
 import "./videoCard.css";
 
 let VideoCard = (props) => {
 	let [playing, setPlaying] = useState(false);
 	let [commentBoxOpen, setCommentBoxOpen] = useState(false);
+	let [currUserComment, setCurrUserComment] = useState("");
+	let [comments, setComments] = useState([]);
+	let user = useContext(authContext);
+
+	let currUserLiked;
+	if (user) {
+		currUserLiked = props.data.likes.includes(user.uid);
+	}
+
+	useEffect(() => {
+		//making comment Arr
+		let f = async () => {
+			let commentsArr = props.data.comments;
+
+			let arr = [];
+
+			for (let i = 0; i < commentsArr.length; i++) {
+				let commentDoc = await firestore
+					.collection("comments")
+					.doc(commentsArr[i])
+					.get();
+
+				arr.push(commentDoc.data());
+			}
+
+			setComments(arr);
+		};
+		f();
+	}, [props]);
+
 	return (
 		<div className="video-card">
 			<p className="video-card-username">{props.data.name}</p>
@@ -24,30 +56,86 @@ let VideoCard = (props) => {
 			>
 				chat
 			</span>
-			<span class="material-icons-outlined video-card-like">
-				favorite_border
+			<span
+				//toggle like button
+				onClick={async () => {
+					let likesArr = props.data.likes;
+
+					if (currUserLiked) {
+						likesArr = likesArr.filter((el) => {
+							return el != user.uid;
+						});
+					} else {
+						likesArr.push(user.uid);
+					}
+
+					await firestore
+						.collection("posts")
+						.doc(props.data.id)
+						.update({ likes: likesArr });
+				}}
+				class="material-icons-outlined video-card-like"
+			>
+				{currUserLiked ? "favorite" : "favorite_border"}
 			</span>
 			{commentBoxOpen ? (
 				<div className="video-card-comment-box">
 					<div className="actual-comments">
-						<div className="post-user-comment">
-							<img src="https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80" />
-							<div>
-								<h5>user name</h5>
-								<p>This is actual comment</p>
-							</div>
-						</div>
-						<div className="post-user-comment">
-							<img src="https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&w=1000&q=80" />
-							<div>
-								<h5>user name</h5>
-								<p>This is actual comment</p>
-							</div>
-						</div>
+						{comments.map((el) => {
+							return (
+								<div className="post-user-comment">
+									<img src={el.photo} />
+									<div>
+										<h5>{el.name}</h5>
+										<p>{el.comment}</p>
+									</div>
+								</div>
+							);
+						})}
 					</div>
 					<div className="comment-form">
-						<input type="text" />
-						<button>Post</button>
+						{/* jobhi mai input tag me likhunga wo meri state me save hota rahega */}
+						<input
+							type="text"
+							value={currUserComment}
+							onChange={(e) => {
+								setCurrUserComment(e.currentTarget.value);
+							}}
+						/>
+						<button
+							onClick={async () => {
+								//jo current comment state me hain use comments collection me add kr rha hu
+								let docRef = await firestore.collection("comments").add({
+									name: user.displayName,
+									photo: user.photoURL,
+									comment: currUserComment,
+								});
+
+								setCurrUserComment("");
+								//to jo abhi maine add kra hain uske document ke ref se wo comment ka document nikal lo
+								let doc = await docRef.get();
+								//us document ki id nikal lo
+								let commentId = doc.id;
+
+								//ye jo video card hai uska post document nikalo
+								let postDoc = await firestore
+									.collection("posts")
+									.doc(props.data.id)
+									.get();
+								// us document me comment array hai whapr jo apne apni comment add kra h uski id insert krdo
+								let postCommentArr = postDoc.data().comments;
+
+								postCommentArr.push(commentId);
+
+								//ab ye comments array firestore jakr update krdo
+								await firestore
+									.collection("posts")
+									.doc(props.data.id)
+									.update({ comments: postCommentArr });
+							}}
+						>
+							Post
+						</button>
 					</div>
 				</div>
 			) : (

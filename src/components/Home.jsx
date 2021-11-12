@@ -14,7 +14,7 @@ let Home = () => {
 		// ki agar kuch update hooya database mei toh fir sare client ko event and woh hamare UI update kar dega
 
 		// agar database mei kuch update hota hain toh ye function chala dena
-		firestore.collection("posts").onSnapshot((querySnapshot) => {
+		let unsub = firestore.collection("posts").onSnapshot((querySnapshot) => {
 			let docArr = querySnapshot.docs;
 
 			let arr = [];
@@ -25,6 +25,10 @@ let Home = () => {
 
 			setPosts(arr);
 		});
+
+		return () => {
+			unsub();
+		};
 	}, []);
 
 	return (
@@ -75,10 +79,10 @@ let Home = () => {
 						// jb upload ho jati file hamare storage pe
 						// tab ye function chalta hain
 
-						uploadTask.snapshot.ref.getDownloadURL().then((url) => {
+						uploadTask.snapshot.ref.getDownloadURL().then(async (url) => {
 							// console.log(url);
 
-							firestore.collection("posts").add({
+							await firestore.collection("posts").add({
 								name: user.displayName,
 								url,
 								likes: [],
