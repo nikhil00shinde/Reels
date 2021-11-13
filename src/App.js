@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import AuthProvider from "./AuthProvider";
 import { firestore } from "./firebase";
 import { useEffect } from "react";
+import Profile from "./components/Profile";
 let App = () => {
 	// useEffect(() => {
 	// add  -> collection is not present it will create the collection on it's own
@@ -48,6 +49,9 @@ let App = () => {
 						</Route>
 						<Route exact path="/">
 							<Home />
+						</Route>
+						<Route exact path="/profile">
+							<Profile />
 						</Route>
 					</Switch>
 				</Router>

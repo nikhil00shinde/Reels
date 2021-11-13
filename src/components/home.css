@@ -23,3 +23,13 @@ input[type="file"] {
 	bottom: 13rem;
 	right: 20px;
 }
+
+.profile-btn{
+	position: fixed;
+	height: 5rem;
+	width: 5rem;
+	bottom: 19rem;
+	right: 20px;
+	border: none;
+	border-radius: 50%;
+}

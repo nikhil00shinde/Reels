@@ -1,12 +1,14 @@
 import { auth, storage, firestore } from "../firebase";
 import { authContext } from "../AuthProvider";
 import { useContext, useEffect, useState } from "react";
-import { Redirect } from "react-router";
+import { Redirect, useHistory } from "react-router";
+import { Link } from "react-router-dom";
 import "./home.css";
 import VideoCard from "./videoCard";
 
 let Home = () => {
 	let user = useContext(authContext);
+	let history = useHistory();
 	let [posts, setPosts] = useState([]);
 
 	useEffect(() => {
@@ -92,6 +94,17 @@ let Home = () => {
 					});
 				}}
 			/>
+			<Link to="/profile">
+				<button
+					onClick={() => {
+						// history.push("/profile");
+						// Link and Redirect ko hum function ke andhar use nhi karte
+					}}
+					className="profile-btn"
+				>
+					Profile
+				</button>
+			</Link>
 		</>
 	);
 };
