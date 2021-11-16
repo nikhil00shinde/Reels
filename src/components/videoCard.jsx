@@ -36,6 +36,35 @@ let VideoCard = (props) => {
 		f();
 	}, [props]);
 
+	//intersection observer API
+
+	let callback = (entries) => {
+		entries.forEach((entry) => {
+			let ele = entry.target;
+			console.log(ele);
+			console.log(entry.isIntersecting);
+			if (!entry.isIntersecting) {
+				ele.pause();
+			} else {
+				ele.play();
+			}
+		});
+	};
+
+	let observer = new IntersectionObserver(callback, { threshold: 0.6 });
+
+	useEffect(() => {
+		let elements = document.querySelectorAll(".video-card-video");
+
+		elements.forEach((el) => {
+			observer.observe(el);
+		});
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [props]);
+
 	return (
 		<div className="video-card">
 			<p className="video-card-username">{props.data.name}</p>
@@ -154,6 +183,7 @@ let VideoCard = (props) => {
 				loop
 				src={props.data.url}
 				className="video-card-video"
+				muted="muted"
 			></video>
 		</div>
 	);
